@@ -2,24 +2,14 @@ APP_NAME := URLTrap
 APP_BUNDLE := build/$(APP_NAME).app
 SCHEMES ?= http,https
 
-# Generate plist entries for each scheme
-define generate_scheme_entry
-        <dict>
-            <key>CFBundleURLName</key>
-            <string>$(1) URL</string>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>$(1)</string>
-            </array>
-        </dict>
-endef
-
 .PHONY: all clean
 
 all: $(APP_BUNDLE)
 
-build/Info.plist: Info.plist.template
-	@mkdir -p build
+$(APP_BUNDLE): main.swift Info.plist.template
+	rm -rf $(APP_BUNDLE)
+	mkdir -p $(APP_BUNDLE)/Contents/MacOS
+	mkdir -p $(APP_BUNDLE)/Contents/Resources
 	@echo "Generating Info.plist for schemes: $(SCHEMES)"
 	@( \
 		schemes="$(SCHEMES)"; \
@@ -36,12 +26,7 @@ build/Info.plist: Info.plist.template
 			entries="$$entries        </dict>\n"; \
 		done; \
 		sed "s|@@SCHEME_ENTRIES@@|$$entries|" Info.plist.template \
-	) > build/Info.plist
-
-$(APP_BUNDLE): main.swift build/Info.plist
-	mkdir -p $(APP_BUNDLE)/Contents/MacOS
-	mkdir -p $(APP_BUNDLE)/Contents/Resources
-	cp build/Info.plist $(APP_BUNDLE)/Contents/Info.plist
+	) > $(APP_BUNDLE)/Contents/Info.plist
 	swiftc -o $(APP_BUNDLE)/Contents/MacOS/$(APP_NAME) main.swift -framework Cocoa
 	codesign --force --deep --sign - $(APP_BUNDLE)
 	@echo ""
