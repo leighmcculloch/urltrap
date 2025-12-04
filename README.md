@@ -2,33 +2,44 @@
 
 A macOS application that intercepts URL scheme opens, captures the URLs, and displays them. When the app quits, it restores the original handlers.
 
+## Install
+
+```bash
+make install
+```
+
+Installs to `~/Applications/URLTrap (http,https).app`.
+
+Or with custom schemes:
+
+```bash
+make install SCHEMES=ftp,mailto
+```
+
+Installs to `~/Applications/URLTrap (ftp,mailto).app`.
+
 ## Build
 
 ```bash
-make
+make build
 ```
 
-To build with custom URL schemes:
+Builds to `./build/URLTrap (http,https).app`.
+
+Or with custom schemes:
 
 ```bash
-make SCHEMES=http,https,ftp,mailto
+make build SCHEMES=ftp,mailto
 ```
 
-Default schemes are `http,https`.
-
-## Run
-
-```bash
-open build/URLTrap.app
-```
+Builds to `./build/URLTrap (ftp,mailto).app`.
 
 ## Usage
 
-1. Launch URLTrap
+1. Launch URLTrap by double clicking the .app file.
 2. The app registers itself as the handler for the configured URL schemes
 3. Any URL opens for those schemes will be captured and displayed
-4. Click "Clear" to clear captured URLs
-5. Click "Quit" to exit and restore original handlers
+4. Quit the app and original original handlers will be restored
 
 ## Requirements
 
