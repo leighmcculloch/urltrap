@@ -50,6 +50,5 @@ clean:
 	rm -rf build
 
 icon-rounded: icon.png round-icon.swift
-	swiftc -o build/round-icon round-icon.swift -framework Cocoa
-	./build/round-icon icon.png icon-rounded.png 256
+	swift round-icon.swift icon.png icon-rounded.png 256
 	@echo "Created icon-rounded.png"
