@@ -1,5 +1,4 @@
 import Cocoa
-import CoreServices
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var originalHttpHandler: String?
@@ -15,20 +14,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         originalHttpsHandler = getCurrentHandler(scheme: "https")
 
         // Register as handler
-        let httpResult = setHandler(scheme: "http", bundleID: bundleID)
-        let httpsResult = setHandler(scheme: "https", bundleID: bundleID)
+        setHandler(scheme: "http", bundleID: bundleID)
+        setHandler(scheme: "https", bundleID: bundleID)
 
-        // Check if registration worked
-        let currentHandler = getCurrentHandler(scheme: "http")
-        if currentHandler != bundleID {
-            let alert = NSAlert()
-            alert.messageText = "Registration Required"
-            alert.informativeText = "Please click 'Use URLCap' in the system dialog to enable URL capture, then reopen this app.\n\nHTTP result: \(httpResult), HTTPS result: \(httpsResult)"
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "OK")
-            alert.runModal()
-            NSApp.terminate(nil)
-            return
+        // Give the system a moment to process, then check if registration worked
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
+            let currentHandler = getCurrentHandler(scheme: "http")
+            if currentHandler != bundleID {
+                let alert = NSAlert()
+                alert.messageText = "Registration Required"
+                alert.informativeText = "Please click 'Use URLCap' in the system dialog to enable URL capture, then reopen this app."
+                alert.alertStyle = .warning
+                alert.addButton(withTitle: "OK")
+                alert.runModal()
+                NSApp.terminate(nil)
+            }
         }
 
         setupWindow()
@@ -51,10 +51,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         // Restore original handlers
         if let handler = originalHttpHandler {
-            _ = setHandler(scheme: "http", bundleID: handler)
+            setHandler(scheme: "http", bundleID: handler)
         }
         if let handler = originalHttpsHandler {
-            _ = setHandler(scheme: "https", bundleID: handler)
+            setHandler(scheme: "https", bundleID: handler)
         }
     }
 
@@ -136,14 +136,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func getCurrentHandler(scheme: String) -> String? {
-        if let result = LSCopyDefaultHandlerForURLScheme(scheme as CFString) {
-            return result.takeRetainedValue() as String
-        }
-        return nil
+        guard let url = URL(string: "\(scheme)://example.com") else { return nil }
+        guard let appURL = NSWorkspace.shared.urlForApplication(toOpen: url) else { return nil }
+        guard let bundle = Bundle(url: appURL) else { return nil }
+        return bundle.bundleIdentifier
     }
 
-    func setHandler(scheme: String, bundleID: String) -> OSStatus {
-        return LSSetDefaultHandlerForURLScheme(scheme as CFString, bundleID as CFString)
+    func setHandler(scheme: String, bundleID: String) {
+        NSWorkspace.shared.setDefaultApplication(
+            at: NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID)!,
+            toOpenURLsWithScheme: scheme
+        ) { error in
+            if let error = error {
+                print("Failed to set handler: \(error)")
+            }
+        }
     }
 }
 
