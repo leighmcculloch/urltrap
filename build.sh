@@ -2,17 +2,19 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BUILD_DIR="$SCRIPT_DIR/build"
 APP_NAME="URLCap"
-APP_BUNDLE="$SCRIPT_DIR/$APP_NAME.app"
+APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
 
 echo "Building $APP_NAME..."
 
-# Remove old build
-rm -rf "$APP_BUNDLE"
+# Remove old build directory and recreate
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
 
 # Compile the Swift helper
 echo "Compiling url-handler-helper..."
-swiftc -o "$SCRIPT_DIR/url-handler-helper" "$SCRIPT_DIR/url-handler-helper.swift" -framework CoreServices 2>/dev/null || true
+swiftc -o "$BUILD_DIR/url-handler-helper" "$SCRIPT_DIR/url-handler-helper.swift" -framework CoreServices 2>/dev/null || true
 
 # Compile the AppleScript into an app bundle
 echo "Compiling AppleScript application..."
@@ -24,7 +26,7 @@ cp "$SCRIPT_DIR/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 
 # Copy the helper tool to Resources
 echo "Installing url-handler-helper..."
-cp "$SCRIPT_DIR/url-handler-helper" "$APP_BUNDLE/Contents/Resources/"
+cp "$BUILD_DIR/url-handler-helper" "$APP_BUNDLE/Contents/Resources/"
 chmod +x "$APP_BUNDLE/Contents/Resources/url-handler-helper"
 
 # Update Launch Services database so macOS knows about our URL handlers
