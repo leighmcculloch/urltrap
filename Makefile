@@ -9,7 +9,7 @@ install: build
 	@if [ -e ~/Applications/"$(APP_NAME).app" ]; then \
 		rm -ri ~/Applications/"$(APP_NAME).app" || exit 1; \
 	fi
-	cp -R "$(APP_BUNDLE)" ~/Applications/
+	cp -R "$(APP_BUNDLE)" ~/Applications/"$(APP_NAME).app"
 	@echo "Installed to ~/Applications/$(APP_NAME).app"
 
 build: clean main.swift Info.plist
