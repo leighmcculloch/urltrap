@@ -6,28 +6,21 @@ SCHEMES ?= http,https
 
 all: $(APP_BUNDLE)
 
-$(APP_BUNDLE): main.swift Info.plist.template
+$(APP_BUNDLE): main.swift Info.plist
 	rm -rf $(APP_BUNDLE)
 	mkdir -p $(APP_BUNDLE)/Contents/MacOS
 	mkdir -p $(APP_BUNDLE)/Contents/Resources
-	@echo "Generating Info.plist for schemes: $(SCHEMES)"
-	@( \
-		schemes="$(SCHEMES)"; \
-		entries=""; \
-		IFS=','; \
-		for scheme in $$schemes; do \
-			entries="$$entries        <dict>\n"; \
-			entries="$$entries            <key>CFBundleURLName</key>\n"; \
-			entries="$$entries            <string>$$scheme URL</string>\n"; \
-			entries="$$entries            <key>CFBundleURLSchemes</key>\n"; \
-			entries="$$entries            <array>\n"; \
-			entries="$$entries                <string>$$scheme</string>\n"; \
-			entries="$$entries            </array>\n"; \
-			entries="$$entries        </dict>\n"; \
-		done; \
-		sed "s|@@SCHEME_ENTRIES@@|$$entries|" Info.plist.template \
-	) > $(APP_BUNDLE)/Contents/Info.plist
 	swiftc -o $(APP_BUNDLE)/Contents/MacOS/$(APP_NAME) main.swift -framework Cocoa
+	cp Info.plist $(APP_BUNDLE)/Contents/Info.plist
+	@echo "Adding schemes: $(SCHEMES)"
+	@/usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" $(APP_BUNDLE)/Contents/Info.plist
+	@i=0; for scheme in $$(echo "$(SCHEMES)" | tr ',' ' '); do \
+		/usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:$$i dict" $(APP_BUNDLE)/Contents/Info.plist; \
+		/usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:$$i:CFBundleURLName string '$$scheme URL'" $(APP_BUNDLE)/Contents/Info.plist; \
+		/usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:$$i:CFBundleURLSchemes array" $(APP_BUNDLE)/Contents/Info.plist; \
+		/usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:$$i:CFBundleURLSchemes:0 string '$$scheme'" $(APP_BUNDLE)/Contents/Info.plist; \
+		i=$$((i + 1)); \
+	done
 	codesign --force --deep --sign - $(APP_BUNDLE)
 	@echo ""
 	@echo "Build complete: $(APP_BUNDLE)"
