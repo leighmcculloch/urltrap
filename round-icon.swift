@@ -16,29 +16,17 @@ guard let inputImage = NSImage(contentsOfFile: inputPath) else {
 }
 
 let cgSize = CGFloat(size)
-let padding = cgSize * 0.11
 let outputSize = NSSize(width: size, height: size)
-let iconSize = CGFloat(size) - padding * 2
+let iconSize = cgSize
 let outputImage = NSImage(size: outputSize)
 
 outputImage.lockFocus()
 
-let iconRect = NSRect(x: padding, y: padding + cgSize * 0.015, width: iconSize, height: iconSize)
+let iconRect = NSRect(x: 0, y: 0, width: iconSize, height: iconSize)
 let radius = iconSize * 0.23 // macOS Big Sur style corner radius
 
 // Create the rounded path for the icon
 let path = NSBezierPath(roundedRect: iconRect, xRadius: radius, yRadius: radius)
-
-// Draw shadow
-NSGraphicsContext.current?.saveGraphicsState()
-let shadow = NSShadow()
-shadow.shadowColor = NSColor.black.withAlphaComponent(0.6)
-shadow.shadowOffset = NSSize(width: 0, height: -cgSize * 0.02)
-shadow.shadowBlurRadius = cgSize * 0.07
-shadow.set()
-NSColor.black.setFill()
-path.fill()
-NSGraphicsContext.current?.restoreGraphicsState()
 
 // Clip to rounded rect and draw the image
 NSGraphicsContext.current?.saveGraphicsState()
