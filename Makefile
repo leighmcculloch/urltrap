@@ -3,7 +3,7 @@ SORTED_SCHEMES := $(shell echo "$(SCHEMES)" | tr ',' '\n' | sort | tr '\n' ',' |
 APP_NAME := URLTrap ($(SORTED_SCHEMES))
 APP_BUNDLE := build/$(APP_NAME).app
 
-.PHONY: build clean install
+.PHONY: build clean install icon-rounded
 
 install: build
 	@if [ -e ~/Applications/"$(APP_NAME).app" ]; then \
@@ -48,3 +48,8 @@ build: clean main.swift Info.plist icon.png
 
 clean:
 	rm -rf build
+
+icon-rounded: icon.png round-icon.swift
+	swiftc -o build/round-icon round-icon.swift -framework Cocoa
+	./build/round-icon icon.png icon-rounded.png 256
+	@echo "Created icon-rounded.png"

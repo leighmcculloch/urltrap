@@ -1,5 +1,7 @@
 # URLTrap
 
+<img src="icon-rounded.png" align="right" width="128">
+
 A macOS application that intercepts URL scheme opens, captures the URLs, and displays them. When the app quits, it restores the original handlers.
 
 ## Install
