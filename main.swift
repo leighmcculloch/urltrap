@@ -1,21 +1,32 @@
 import Cocoa
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var originalHttpHandler: String?
-    var originalHttpsHandler: String?
+    var originalHandlers: [String: String] = [:]
     var capturedURLs: [String] = []
     var window: NSWindow?
     var textView: NSTextView?
     let bundleID = Bundle.main.bundleIdentifier ?? "com.urlcap.URLCap"
+    var schemes: [String] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Save original handlers
-        originalHttpHandler = getCurrentHandler(scheme: "http")
-        originalHttpsHandler = getCurrentHandler(scheme: "https")
+        // Read schemes from Info.plist
+        schemes = getSchemesFromInfoPlist()
 
-        // Register as handler
-        setHandler(scheme: "http", bundleID: bundleID)
-        setHandler(scheme: "https", bundleID: bundleID)
+        if schemes.isEmpty {
+            let alert = NSAlert()
+            alert.messageText = "No URL Schemes"
+            alert.informativeText = "No URL schemes found in Info.plist"
+            alert.alertStyle = .critical
+            alert.runModal()
+            NSApp.terminate(nil)
+            return
+        }
+
+        // Save original handlers and register as handler for each scheme
+        for scheme in schemes {
+            originalHandlers[scheme] = getCurrentHandler(scheme: scheme)
+            setHandler(scheme: scheme, bundleID: bundleID)
+        }
 
         setupWindow()
         updateDisplay()
@@ -36,12 +47,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         // Restore original handlers
-        if let handler = originalHttpHandler {
-            setHandler(scheme: "http", bundleID: handler)
+        for (scheme, handler) in originalHandlers {
+            setHandler(scheme: scheme, bundleID: handler)
         }
-        if let handler = originalHttpsHandler {
-            setHandler(scheme: "https", bundleID: handler)
+    }
+
+    func getSchemesFromInfoPlist() -> [String] {
+        guard let urlTypes = Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]] else {
+            return []
         }
+        var schemes: [String] = []
+        for urlType in urlTypes {
+            if let urlSchemes = urlType["CFBundleURLSchemes"] as? [String] {
+                schemes.append(contentsOf: urlSchemes)
+            }
+        }
+        return schemes
     }
 
     func setupWindow() {
@@ -95,10 +116,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func updateDisplay() {
-        var text = "URLCap is active and capturing HTTP/HTTPS URLs.\n\n"
-        text += "Original HTTP handler: \(originalHttpHandler ?? "unknown")\n"
-        text += "Original HTTPS handler: \(originalHttpsHandler ?? "unknown")\n\n"
-        text += "Captured URLs:\n"
+        var text = "URLCap is active and capturing URLs.\n\n"
+        text += "Schemes: \(schemes.joined(separator: ", "))\n\n"
+        text += "Original handlers:\n"
+        for (scheme, handler) in originalHandlers.sorted(by: { $0.key < $1.key }) {
+            text += "  \(scheme): \(handler)\n"
+        }
+        text += "\nCaptured URLs:\n"
 
         if capturedURLs.isEmpty {
             text += "(No URLs captured yet)\n"
@@ -129,12 +153,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func setHandler(scheme: String, bundleID: String) {
+        guard let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
+            return
+        }
         NSWorkspace.shared.setDefaultApplication(
-            at: NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID)!,
+            at: appURL,
             toOpenURLsWithScheme: scheme
         ) { error in
             if let error = error {
-                print("Failed to set handler: \(error)")
+                print("Failed to set handler for \(scheme): \(error)")
             }
         }
     }

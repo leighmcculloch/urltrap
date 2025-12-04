@@ -26,22 +26,7 @@
     <false/>
     <key>CFBundleURLTypes</key>
     <array>
-        <dict>
-            <key>CFBundleURLName</key>
-            <string>HTTP URL</string>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>http</string>
-            </array>
-        </dict>
-        <dict>
-            <key>CFBundleURLName</key>
-            <string>HTTPS URL</string>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>https</string>
-            </array>
-        </dict>
+@@SCHEME_ENTRIES@@
     </array>
 </dict>
 </plist>
