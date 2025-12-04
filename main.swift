@@ -17,20 +17,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setHandler(scheme: "http", bundleID: bundleID)
         setHandler(scheme: "https", bundleID: bundleID)
 
-        // Give the system a moment to process, then check if registration worked
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
-            let currentHandler = getCurrentHandler(scheme: "http")
-            if currentHandler != bundleID {
-                let alert = NSAlert()
-                alert.messageText = "Registration Required"
-                alert.informativeText = "Please click 'Use URLCap' in the system dialog to enable URL capture, then reopen this app."
-                alert.alertStyle = .warning
-                alert.addButton(withTitle: "OK")
-                alert.runModal()
-                NSApp.terminate(nil)
-            }
-        }
-
         setupWindow()
         updateDisplay()
     }
