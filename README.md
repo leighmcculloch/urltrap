@@ -1,4 +1,4 @@
-<img src="icon-rounded.png" />
+<p align="center"><img src="icon-rounded.png" /></p>
 
 # URLTrap
 
