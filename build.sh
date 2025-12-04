@@ -24,10 +24,6 @@ cp "$SCRIPT_DIR/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 echo "Compiling url-handler-helper..."
 swiftc -o "$APP_BUNDLE/Contents/Resources/url-handler-helper" "$SCRIPT_DIR/url-handler-helper.swift" -framework CoreServices 2>/dev/null || true
 
-# Update Launch Services database so macOS knows about our URL handlers
-echo "Updating Launch Services database..."
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$APP_BUNDLE"
-
 echo ""
 echo "Build complete: $APP_BUNDLE"
 echo ""
