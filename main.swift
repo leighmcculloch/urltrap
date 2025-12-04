@@ -5,7 +5,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var capturedURLs: [String] = []
     var window: NSWindow?
     var textView: NSTextView?
-    let bundleID = Bundle.main.bundleIdentifier ?? "com.urlcap.URLCap"
+    let bundleID = Bundle.main.bundleIdentifier ?? "com.urltrap.URLTrap"
     var schemes: [String] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -73,7 +73,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window?.title = "URLCap - URL Capture"
+        window?.title = "URLTrap"
         window?.center()
 
         let contentView = NSView(frame: windowRect)
@@ -116,7 +116,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func updateDisplay() {
-        var text = "URLCap is active and capturing URLs.\n\n"
+        var text = "URLTrap is active and capturing URLs.\n\n"
         text += "Schemes: \(schemes.joined(separator: ", "))\n\n"
         text += "Original handlers:\n"
         for (scheme, handler) in originalHandlers.sorted(by: { $0.key < $1.key }) {

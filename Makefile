@@ -1,4 +1,4 @@
-APP_NAME := URLCap
+APP_NAME := URLTrap
 APP_BUNDLE := build/$(APP_NAME).app
 SCHEMES ?= http,https
 
