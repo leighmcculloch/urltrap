@@ -2,12 +2,16 @@ APP_NAME := URLTrap
 APP_BUNDLE := build/$(APP_NAME).app
 SCHEMES ?= http,https
 
-.PHONY: all clean
+.PHONY: build clean install
 
-all: $(APP_BUNDLE)
+install: build
+	@if [ -e ~/Applications/$(APP_NAME).app ]; then \
+		rm -ri ~/Applications/$(APP_NAME).app || exit 1; \
+	fi
+	cp -R $(APP_BUNDLE) ~/Applications/
+	@echo "Installed to ~/Applications/$(APP_NAME).app"
 
-$(APP_BUNDLE): main.swift Info.plist
-	rm -rf $(APP_BUNDLE)
+build: clean main.swift Info.plist
 	mkdir -p $(APP_BUNDLE)/Contents/MacOS
 	mkdir -p $(APP_BUNDLE)/Contents/Resources
 	swiftc -o $(APP_BUNDLE)/Contents/MacOS/$(APP_NAME) main.swift -framework Cocoa
