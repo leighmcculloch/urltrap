@@ -5,12 +5,13 @@ APP_BUNDLE := build/$(APP_NAME).app
 
 all: $(APP_BUNDLE)
 
-$(APP_BUNDLE): URLCap.applescript Info.plist url-handler-helper.swift
+$(APP_BUNDLE): main.swift Info.plist
 	rm -rf build
-	mkdir -p build
-	osacompile -o $(APP_BUNDLE) URLCap.applescript
+	mkdir -p $(APP_BUNDLE)/Contents/MacOS
+	mkdir -p $(APP_BUNDLE)/Contents/Resources
 	cp Info.plist $(APP_BUNDLE)/Contents/Info.plist
-	swiftc -o $(APP_BUNDLE)/Contents/Resources/url-handler-helper url-handler-helper.swift -framework CoreServices 2>/dev/null || true
+	swiftc -o $(APP_BUNDLE)/Contents/MacOS/$(APP_NAME) main.swift -framework Cocoa -framework CoreServices
+	codesign --force --deep --sign - $(APP_BUNDLE)
 	@echo ""
 	@echo "Build complete: $(APP_BUNDLE)"
 	@echo ""
