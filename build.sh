@@ -12,10 +12,6 @@ echo "Building $APP_NAME..."
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
-# Compile the Swift helper
-echo "Compiling url-handler-helper..."
-swiftc -o "$BUILD_DIR/url-handler-helper" "$SCRIPT_DIR/url-handler-helper.swift" -framework CoreServices 2>/dev/null || true
-
 # Compile the AppleScript into an app bundle
 echo "Compiling AppleScript application..."
 osacompile -o "$APP_BUNDLE" "$SCRIPT_DIR/URLCap.applescript"
@@ -24,10 +20,9 @@ osacompile -o "$APP_BUNDLE" "$SCRIPT_DIR/URLCap.applescript"
 echo "Installing custom Info.plist..."
 cp "$SCRIPT_DIR/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 
-# Copy the helper tool to Resources
-echo "Installing url-handler-helper..."
-cp "$BUILD_DIR/url-handler-helper" "$APP_BUNDLE/Contents/Resources/"
-chmod +x "$APP_BUNDLE/Contents/Resources/url-handler-helper"
+# Compile the Swift helper directly into the app bundle
+echo "Compiling url-handler-helper..."
+swiftc -o "$APP_BUNDLE/Contents/Resources/url-handler-helper" "$SCRIPT_DIR/url-handler-helper.swift" -framework CoreServices 2>/dev/null || true
 
 # Update Launch Services database so macOS knows about our URL handlers
 echo "Updating Launch Services database..."
